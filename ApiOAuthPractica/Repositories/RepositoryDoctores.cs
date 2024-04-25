@@ -22,5 +22,11 @@ namespace ApiOAuthPractica.Repositories
         {
             return await this.context.Doctores.FirstOrDefaultAsync(x => x.IdDoctor == id);
         }
+
+        public async Task<Doctor> LogInDoctorAsync(string apellido, int iddoctor)
+        {
+            return await this.context.Doctores.Where(x => x.Apellido == apellido
+                && x.IdDoctor == iddoctor).FirstOrDefaultAsync();
+        }
     }
 }
