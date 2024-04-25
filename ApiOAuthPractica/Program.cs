@@ -13,16 +13,17 @@ var builder = WebApplication.CreateBuilder(args);
 HelperOAuth helper = new HelperOAuth(builder.Configuration);
 builder.Services.AddSingleton<HelperOAuth>(helper);
 
-builder.Services.AddAuthentication(helper.GetAuthenticationSchema()).AddJwtBearer(helper.GetJwtBearerOptions());
+builder.Services.AddAuthentication(helper.GetAuthenticationSchema())
+    .AddJwtBearer(helper.GetJwtBearerOptions());
 
-builder.Services.AddAzureClients(factory =>
-{
-    factory.AddSecretClient(builder.Configuration.GetSection("KeyVault"));
-});
+//builder.Services.AddAzureClients(factory =>
+//{
+//    factory.AddSecretClient(builder.Configuration.GetSection("KeyVault"));
+//});
 
-SecretClient secretClient = 
-    builder.Services.BuildServiceProvider().GetService<SecretClient>();
-KeyVaultSecret secret = await secretClient.GetSecretAsync("SqlAzure");
+//SecretClient secretClient = 
+//    builder.Services.BuildServiceProvider().GetService<SecretClient>();
+//KeyVaultSecret secret = await secretClient.GetSecretAsync("SqlAzure");
 
 //string connectionString = secret.Value;
 string connectionString = builder.Configuration.GetConnectionString("SqlAzure");
