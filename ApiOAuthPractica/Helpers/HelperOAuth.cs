@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Azure.Security.KeyVault.Secrets;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Azure;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -11,11 +13,20 @@ namespace ApiOAuthPractica.Helpers
         public string Audience { get; set; }
         public string SecretKey { get; set; }
 
-        public HelperOAuth(IConfiguration configuration)
+        private SecretClient secretClient;
+
+        public HelperOAuth(IConfiguration configuration, SecretClient secretClient)
         {
-            this.Issuer = configuration.GetValue<string>("ApiOAuth:Issuer");
-            this.Audience = configuration.GetValue<string>("ApiOAuth:Audience");
-            this.SecretKey = configuration.GetValue<string>("ApiOAuth:SecretKey");
+            this.secretClient = secretClient;
+            KeyVaultSecret secretIssuer = this.secretClient.GetSecret("Issuer");
+            KeyVaultSecret secretAudience = this.secretClient.GetSecret("Audience");
+            KeyVaultSecret secretSecretKey = this.secretClient.GetSecret("SecretKey");
+            this.Issuer = secretIssuer.Value;
+            this.Audience = secretAudience.Value;
+            this.SecretKey = secretSecretKey.Value;
+            //this.Issuer = configuration.GetValue<string>("ApiOAuth:Issuer");
+            //this.Audience = configuration.GetValue<string>("ApiOAuth:Audience");
+            //this.SecretKey = configuration.GetValue<string>("ApiOAuth:SecretKey");
         }
 
         public SymmetricSecurityKey GetKeyToken()

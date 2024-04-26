@@ -10,23 +10,24 @@ using ApiOAuthPractica.Helpers;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-HelperOAuth helper = new HelperOAuth(builder.Configuration);
+
+builder.Services.AddAzureClients(factory =>
+{
+    factory.AddSecretClient(builder.Configuration.GetSection("KeyVault"));
+});
+
+SecretClient secretClient =
+    builder.Services.BuildServiceProvider().GetService<SecretClient>();
+KeyVaultSecret secret = await secretClient.GetSecretAsync("SqlAzure");
+
+HelperOAuth helper = new HelperOAuth(builder.Configuration, secretClient);
 builder.Services.AddSingleton<HelperOAuth>(helper);
 
 builder.Services.AddAuthentication(helper.GetAuthenticationSchema())
     .AddJwtBearer(helper.GetJwtBearerOptions());
 
-//builder.Services.AddAzureClients(factory =>
-//{
-//    factory.AddSecretClient(builder.Configuration.GetSection("KeyVault"));
-//});
-
-//SecretClient secretClient = 
-//    builder.Services.BuildServiceProvider().GetService<SecretClient>();
-//KeyVaultSecret secret = await secretClient.GetSecretAsync("SqlAzure");
-
-//string connectionString = secret.Value;
-string connectionString = builder.Configuration.GetConnectionString("SqlAzure");
+string connectionString = secret.Value;
+//string connectionString = builder.Configuration.GetConnectionString("SqlAzure");
 
 builder.Services.AddTransient<RepositoryDoctores>();
 builder.Services.AddDbContext<DoctoresContext>
